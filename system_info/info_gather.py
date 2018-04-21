@@ -77,10 +77,10 @@ def mainmenu():
 			print("I can't let you do that Dave")
 			pause()
 
-def main(args):
+def main():
     #Call the main menu
     mainmenu()
 
 if __name__ == '__main__':
     import sys
-    sys.exit(main(sys.argv))
+    sys.exit(main())
