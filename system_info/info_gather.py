@@ -25,6 +25,16 @@ def run_script(value):
 
     subprocess.call(com,shell=True)
 
+def get_files(path,value):
+    matches = []
+    for root, dirs, files in os.walk(path):
+        for filename in fnmatch.filter(files,value):
+            matches.append(filename)
+    # Sort files alphabetically
+    matches.sort()
+
+    return matches
+
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
