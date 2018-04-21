@@ -34,10 +34,9 @@ def mov_files(path,dfolder,value):
     # Create destination folder if it doesn't exist.
     ensure_dir(dpath)
 
-    try:
-        matches = get_files(path,value)
-        for i in range(len(matches)):
-            shutil.move(os.path.join(path,matches[i]),os.path.join(dpath,matches[i]))
+    matches = get_files(path,value)
+    for i in range(len(matches)):
+        shutil.move(os.path.join(path,matches[i]),os.path.join(dpath,matches[i]))
 
 def makdir(path):
     path=str(path)
