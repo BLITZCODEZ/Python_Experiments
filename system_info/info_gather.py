@@ -25,6 +25,20 @@ def run_script(value):
 
     subprocess.call(com,shell=True)
 
+def ensure_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+def mov_files(path,dfolder,value):
+
+    # Create destination folder if it doesn't exist.
+    ensure_dir(dpath)
+
+    try:
+        matches = get_files(path,value)
+        for i in range(len(matches)):
+            shutil.move(os.path.join(path,matches[i]),os.path.join(dpath,matches[i]))
+
 def makdir(path):
     path=str(path)
     val=os.path.exists(path)
