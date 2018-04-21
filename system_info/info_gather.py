@@ -37,11 +37,14 @@ def run_script(value):
 	subprocess.call(com,shell=True)
 
 def drive():
-	com = ['df','-h']
+	#com = ['echo "Begin Status" > $HOME/status.`date +%y%m%d`.txt']
+	#com += ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+	#com += ['echo "Phase 1: Storage Usage" >> $HOME/status.`date +%y%m%d`.txt']
+	com = ['df -h >> $HOME/status.`date +%y%m%d`.txt']
 	run_script(com)
 	
 def ino():
-	com = ['df','-i']
+	com = ['df -i >> $HOME/status.`date +%y%m%d`.txt']
 	run_script(com)
 	
 def logs():
