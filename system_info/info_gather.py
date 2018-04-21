@@ -1,27 +1,16 @@
 #!/usr/bin/python3
-import os
+import os, os.path
 import sys
 import shutil
 import fnmatch
 import subprocess
+from pathlib import Path
+import datetime
 
-def user_input(msg):
-	
-	uinput = ''
-	
-	if sys.version_info[0] == 3:
-		uinput = input(msg)
-	else:
-		uinput = raw_input(msg)
-		
-	uinput = str(uinput)
-	
-	return uinput
+home=os.environ['HOME']
+today=datetime.date.today()
+today=today.strftime('%y%m%d')
 
-def pause():
-	#Wait for input from the user.
-	pausep = user_input("Press the <ENTER> key to continue...")
-	
 def run_script(value):
 	
 	com = None
@@ -36,54 +25,102 @@ def run_script(value):
 		
 	subprocess.call(com,shell=True)
 
+def makdir(path):
+	path=str(path)
+	val=os.path.exists(path)
+	if not val:
+		com=['mkdir '+path]
+		run_script(com)
+
+def init():
+	chk=Path(str(home)+"/archive")
+	chk=str(chk)
+	val=os.path.exists(chk)
+	if not val:
+		com=['mkdir '+chk]
+		run_script(com)
+	
+
+def logging(step):
+	archpath=Path(home+"/archive/")
+	statusfile=Path(home+"/status."+today+".txt")
+	if step == '0':
+		if os.path.exists(str(statusfile)):
+			darchpath=Path(str(archpath)+"/"+today+"/")
+			darchpath=str(darchpath)
+			makdir(darchpath)
+			archcount=len([fn for fn in os.listdir(darchpath)])
+			archcount=str(archcount)
+			com=['mv $HOME/status.`date +%y%m%d`.txt $HOME/archive/`date +%y%m%d`/status_'+archcount+'.`date +%y%m%d`.txt']
+			run_script(com)
+		
+		com = ['echo "Begin Status" > $HOME/status.`date +%y%m%d`.txt']
+		run_script(com)
+		com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+		run_script(com)
+		com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
+		run_script(com)
+	elif step == '1':
+		com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
+		run_script(com)
+		com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+		run_script(com)
+		com = ['echo "End Status" >> $HOME/status.`date +%y%m%d`.txt']
+		run_script(com)
+	else:
+		com = ['echo "Something went wrong!  Danger! Danger! Danger!" >> $HOME/status.`date +%y%m%d`.txt']
+		run_script(com)
+
 def drive():
-	#com = ['echo "Begin Status" > $HOME/status.`date +%y%m%d`.txt']
-	#com += ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-	#com += ['echo "Phase 1: Storage Usage" >> $HOME/status.`date +%y%m%d`.txt']
+	com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo "Start of Phase 1: Storage Usage: " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
 	com = ['df -h >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo "End of Phase 1: Storage Usage: " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
 	run_script(com)
 	
 def ino():
+	com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo "Start of Phase 2: Inode Usage: " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
 	com = ['df -i >> $HOME/status.`date +%y%m%d`.txt']
 	run_script(com)
+	com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo "End of Phase 2: Inode Usage: " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+	com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
+	run_script(com)
+		
+def mainprocess():
+	init()
+	logging('0')
+	drive()
+	ino()
+	logging('1')
 	
-def logs():
-	print("Good Morning Dave.")
-	
-def mainmenu():
-	
-	while True:
-		menu = {}
-		menu[1] = "Space check"
-		menu[2] = "Inode check"
-		menu[3] = "Log check"
-		ops=menu.keys()
-		_=os.system("clear")
-		print("Linux Sysadmin Report")
-		print('')
-		for entry in ops:
-			opt = '%02d' % entry
-			print (opt, menu[entry])
-		print('')
-		sel=user_input("Please Select: ")
-		print (sel)
-		if sel == '1':
-			drive()
-			pause()
-		elif sel == '2':
-			ino()
-			pause()
-		elif sel == '3':
-			logs()
-			pause()
-		else:
-			print("I can't let you do that Dave")
-			pause()
-
 def main():
     #Call the main menu
-    mainmenu()
+    mainprocess()
 
-if __name__ == '__main__':
-    import sys
+if __name__ == "__main__":
     sys.exit(main())
