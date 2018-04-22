@@ -10,20 +10,22 @@ import datetime
 home=os.environ['HOME']
 today=datetime.date.today()
 today=today.strftime('%y%m%d')
+ofile=os.path.join(home,'status.' + today + '.txt')
+archive=os.path.join(home,'archive/')
 
-def run_script(value):
-
-    com = None
-
-    if sys.version_info[0] == 2:
-        com = ''
-        for ei in value:
-            com += ei
-            com += ' '
-    else:
-        com = value
-
-    subprocess.call(com,shell=True)
+def wrifile(filename,value,wrtype,action):
+    if wrtype == 0:
+        with open(filename, "w") as outfile:
+            if action == '0':
+                act=writeln(value)
+            elif action == '1':
+                subprocess.call(cmd , stdout=outfile)
+    elif wrtype == 1:
+        with open(filename, "a") as outfile:
+            if action == '0':
+                act=writeln(value)
+            elif action == '1':
+                subprocess.call(cmd , stdout=outfile)
 
 def get_files(path,value):
     matches = []
@@ -42,112 +44,55 @@ def ensure_dir(path):
 def mov_files(path,dfolder,value):
 
     # Create destination folder if it doesn't exist.
-    ensure_dir(dpath)
+    ensure_dir(dfolder)
 
     matches = get_files(path,value)
     for i in range(len(matches)):
-        shutil.move(os.path.join(path,matches[i]),os.path.join(dpath,matches[i]))
-
-def makdir(path):
-    path=str(path)
-    val=os.path.exists(path)
-    if not val:
-        com=['mkdir '+path]
-        run_script(com)
-
-def init():
-    chk=Path(str(home)+"/archive")
-    chk=str(chk)
-    val=os.path.exists(chk)
-    if not val:
-        com=['mkdir '+chk]
-        run_script(com)
-
+        shutil.move(os.path.join(path,matches[i]),os.path.join(dfolder,matches[i]))
 
 def logging(step):
-    archpath=Path(home+"/archive/")
-    statusfile=Path(home+"/status."+today+".txt")
     if step == '0':
-        if os.path.exists(str(statusfile)):
-            darchpath=Path(str(archpath)+"/"+today+"/")
+        filechk=get_files(home,"status.*.txt")
+        filechkc=len(filechk)
+        if filechkc > 0:
+            darchpath=Path(archive+"/"+today)
             darchpath=str(darchpath)
-            makdir(darchpath)
-            archcount=len([fn for fn in os.listdir(darchpath)])
-            archcount=str(archcount)
-            com=['mv $HOME/status.`date +%y%m%d`.txt $HOME/archive/`date +%y%m%d`/status_'+archcount+'.`date +%y%m%d`.txt']
-            run_script(com)
+            ensure_dir(darchpath)
+            mov_files(home,archive+"/"+today,"status.*.txt")
 
-        com = ['echo "Begin Status" > $HOME/status.`date +%y%m%d`.txt']
-        run_script(com)
-        com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-        run_script(com)
-        com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
-        run_script(com)
+        wrifile(ofile,"Begin Status",0,0)
+        wrifile(ofile," ",1,0)
+        wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",1,0)
     elif step == '1':
-        com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
-        run_script(com)
-        com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-        run_script(com)
-        com = ['echo "End Status" >> $HOME/status.`date +%y%m%d`.txt']
-        run_script(com)
+        wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",1,0)
+        wrifile(ofile," ",1,0)
+        wrifile(ofile,"End Status",1,0)
     else:
-        com = ['echo "Something went wrong!  Danger! Danger! Danger!" >> $HOME/status.`date +%y%m%d`.txt']
-        run_script(com)
+        wrifile(ofile,"Something went wrong!  Danger! Danger! Danger!",1,0)
 
 def drive():
-    com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo "Start of Phase 1: Storage Usage: " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
+    wrifile(ofile," ",1,0)
+    wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",1,0)
+    wrifile(ofile,"Start of Phase 1: Storage Usage: ",1,0)
+    wrifile(ofile," ",1,0)
+    wrifile(ofile,"df -h",1,1)
+    wrifile(ofile,"End of Phase 1: Storage Usage: ",1,0)
+    wrifile(ofile," ",1,0)
+    wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",1,0)
+    wrifile(ofile," ",1,0)
 
-    ofile = os.path.join(home,'status.' + today + '.txt')
-    cmd = ['df', '-h']
-
-    with open(ofile, "a") as outfile:
-        subprocess.call(cmd , stdout=outfile)
-
-    #com = ['df -h >> $HOME/status.`date +%y%m%d`.txt']
-    #run_script(com)
-    com = ['echo "End of Phase 1: Storage Usage: " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    
 def ino():
-    com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo "Start of Phase 2: Inode Usage: " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-
-    ofile = os.path.join(home,'status.' + today + '.txt')
-    cmd = ['df', '-i']
-
-    with open(ofile, "a") as outfile:
-        subprocess.call(cmd , stdout=outfile)
-
-    com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo "End of Phase 2: Inode Usage: " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo " " >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
-    com = ['echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" >> $HOME/status.`date +%y%m%d`.txt']
-    run_script(com)
+    wrifile(ofile," ",1,0)
+    wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",1,0)
+    wrifile(ofile,"Start of Phase 2: Inode Usage: ",1,0)
+    wrifile(ofile," ",1,0)
+    wrifile(ofile,"df -i",1,1)
+    wrifile(ofile," ",1,0)
+    wrifile(ofile,"End of Phase 2: Inode Usage: ",1,0)
+    wrifile(ofile," ",1,0)
+    wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",1,0)
 
 def mainprocess():
-    init()
     logging('0')
     drive()
     ino()
