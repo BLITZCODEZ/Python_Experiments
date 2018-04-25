@@ -5,14 +5,14 @@ import shutil
 import fnmatch
 import subprocess
 from pathlib import Path
-import datetime
+import time
 import glob
 
 home=os.environ['HOME']
-today=datetime.date.today()
-today=today.strftime('%y%m%d')
-ofile=os.path.join(home,'status.' + today + '.txt')
-archive=os.path.join(home,'archive/')
+today=time.strftime('%y%m%d-%H%M%S')
+archday=time.strftime('%y%m%d')
+ofile=str(os.path.join(home,'status.' + today + '.txt'))
+archive=str(os.path.join(home,'archive/'+archday))
 wt="war"
 
 def wrifile(filename,value,wrtype,action):
@@ -42,31 +42,19 @@ def mov_files(path,dfolder,value):
     ensure_dir(dfolder)
     matches = get_files(path,value)
     for i in range(len(matches)):
-            shutil.move(os.path.join(pals -lartth,matches[i]),os.path.join(dfolder,matches[i]))
+            shutil.move(os.path.join(path,matches[i]),os.path.join(dfolder,matches[i]))
 
+def startlog():
+    wrifile(ofile,"Begin Status\n\n",0,0)
+    wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n",1,0)
 
-def logging(step):
-    if step == '0':
-        filechk=get_files(home,"status.*.txt")
-        filechkc=len(filechk)
-        if filechkc > 0:
-            print(filechk)
-            print(filechkc)
-            darchpath=Path(archive+"/"+today)
-            darchpath=str(darchpath)
-            ensure_dir(darchpath)
-        try:
-            mov_files(home,archive+today,"status.*.txt")
-        except:
-            print('home: '+home+' archive: '+archive+' filechk: '+str(filechk))
+def endlog():
+    wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n",1,0)
+    wrifile(ofile,"End Status\n",1,0)
 
-        wrifile(ofile,"Begin Status\n\n",0,0)
-        wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n",1,0)
-    elif step == '1':
-        wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n",1,0)
-        wrifile(ofile,"End Status\n",1,0)
-    else:
-        wrifile(ofile,"Something went wrong!  Danger! Danger! Danger!\n\n",1,0)
+def archfiles():
+    ensure_dir(archive)
+    mov_files(home,archive,"status.*.txt")
 
 def drive():
     wrifile(ofile,"Start of Phase 1: Storage Usage: \n\n",1,0)
@@ -82,14 +70,18 @@ def ino():
     wrifile(ofile,"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",1,0)
 
 def mainprocess():
-    logging('0')
+    archfiles()
+    startlog()
     drive()
     ino()
-    logging('1')
+    endlog()
+    print(open(home+'/status.'+today+'.txt',wt[2]).read())
 
-def main():
-    #Call the main menu
-    mainprocess()
+mainprocess()
 
-if __name__ == "__main__":
-    sys.exit(main())
+#def main():
+    ##Call the main menu
+    #mainprocess()
+
+#if __name__ == "__main__":
+    #sys.exit(main())
